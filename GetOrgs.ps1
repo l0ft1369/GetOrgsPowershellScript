@@ -4,14 +4,23 @@
         $orgs
     )
 
-    $Limit = 30
+    $Limit = 300
 
     foreach ($org in $orgs) {
-        $newObjOrg = $org | ConvertTo-Json | ConvertFrom-Json
+        $newObjOrg = $org | ConvertTo-Json -Depth 100 | ConvertFrom-Json -Depth 100
+
+        #$newObjOrg = $org | ConvertTo-Json -Depth 100
 
         foreach ($field in $org.organization_fields.PSObject.Properties) {
-            $newObjOrg | Add-Member -NotePropertyName $field.Name -NotePropertyValue $field.Value            
-        }
+            
+                if ($null -eq $field.value)
+                {
+                    $newObjOrg | Add-Member -NotePropertyName $field.Name -NotePropertyValue 0
+                }
+                else{
+                    $newObjOrg | Add-Member -NotePropertyName $field.Name -NotePropertyValue $field.Value
+                } 
+            }
 
         $GlobalList.Add($newObjOrg)
     }
@@ -45,4 +54,5 @@ while ($Orgs.next_page -ne $null) {
 }
 
 
-$GlobalList | Export-Csv -Path "20230106-zd-org-x.csv"
+#$GlobalList | out-file "ZendeskOrgs.json"
+$GlobalList | Export-Csv -Path "./ZendeskOrgs.csv"
