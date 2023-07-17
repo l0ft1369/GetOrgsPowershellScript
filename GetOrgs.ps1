@@ -6,23 +6,26 @@
 
     $Limit = 300
 
-    foreach ($org in $orgs) {
+    foreach ($org in $orgs) 
+    {
         $newObjOrg = $org | ConvertTo-Json -Depth 100 | ConvertFrom-Json -Depth 100
 
-        #$newObjOrg = $org | ConvertTo-Json -Depth 100
-
-        foreach ($field in $org.organization_fields.PSObject.Properties) {
-            
-                if ($null -eq $field.value)
+                foreach ($field in $org.organization_fields.PSObject.Properties)
                 {
-                    $newObjOrg | Add-Member -NotePropertyName $field.Name -NotePropertyValue 0
+                
+                    if ($null -eq $field.value)
+                    {
+                         Add-Member -NotePropertyName $field.Name -NotePropertyValue 0 -InputObject $newObjOrg
+                         
+                    }
+                    else
+                    {
+                        Add-Member -NotePropertyName $field.Name -NotePropertyValue $field.Value -InputObject $newObjOrg
+                        
+                    } 
                 }
-                else{
-                    $newObjOrg | Add-Member -NotePropertyName $field.Name -NotePropertyValue $field.Value
-                } 
-            }
-
-        $GlobalList.Add($newObjOrg)
+            $GlobalList.Add($newObjOrg)
+        
     }
 }
 
@@ -31,6 +34,7 @@ $password = Read-Host -Prompt 'Password: '
 $base64AuthInfo = [Convert]::ToBase64String([Text.Encoding]::ASCII.GetBytes(("{0}:{1}" -f $username,$password)))
 
 $GlobalList = [System.Collections.ArrayList]@()
+#$GlobalList = [System.Collections.Hashtable]::new()
 
 Write-Output $base64AuthInfo
 
